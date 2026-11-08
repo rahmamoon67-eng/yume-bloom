@@ -1,300 +1,167 @@
-• { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-body { overflow: hidden; background: #08030f; font-family: 'Segoe UI', Arial, sans-serif; color: white; touch-action: none; }
-canvas { display: block; width: 100vw; height: 100vh; }
-#ui { position: fixed; inset: 0; pointer-events: none; }
-#top { display: flex; justify-content: space-between; padding: 20px; gap: 10px; font-weight: bold; text-shadow: 0 0 10px rgba(255,105,180,0.5); }
-.pill { background: rgba(24, 13, 37, 0.85); border: 2px solid #ff45c7; border-radius: 25px; padding: 10px 20px; backdrop-filter: blur(5px); box-shadow: 0 0 15px rgba(255,69,199,0.3); font-size: 14px; letter-spacing: 1px; }
-#screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(10, 5, 20, 0.85); backdrop-filter: blur(12px); pointer-events: auto; z-index: 10; transition: all 0.5s ease; }
-.panel { width: min(450px, 92%); padding: 40px 25px; text-align: center; border: 2px solid #ff45c7; border-radius: 30px; background: linear-gradient(145deg, #2a0835, #0d0618); box-shadow: 0 0 70px rgba(255, 69, 199, 0.45); }
-.logo { font-size: clamp(46px, 12vw, 70px); letter-spacing: 10px; color: #fff; font-weight: 900; text-shadow: 0 0 20px #ff00a0, 0 0 40px #ff00a0; margin-bottom: 5px; }
-.sub { margin: 10px 0 30px; color: #ffbde9; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; font-weight: 600; }
-button { pointer-events: auto; cursor: pointer; border: 2px solid #ffc1ec; color: white; background: linear-gradient(135deg, #ff2a85, #b5179e); border-radius: 15px; padding: 14px 28px; font-weight: bold; font-size: 15px; margin: 8px; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(255, 42, 133, 0.4); text-transform: uppercase; }
-button:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 0 25px #ff45c7; }
-button:active { transform: scale(0.98) translateY(0); }
-#sound { background: linear-gradient(135deg, #480ca8, #7209b7); border-color: #c77dff; }
-#message { margin-top: 25px; color: #f6a8de; font-size: 13px; letter-spacing: 2px; font-style: italic; }
-#pause { position: absolute; right: 20px; top: 85px; pointer-events: auto; width: 45px; height: 45px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-#controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 30px; pointer-events: none; }
-.pad { display: flex; gap: 20px; }
-.control { width: 68px; height: 68px; border-radius: 50%; background: rgba(229, 77, 180, 0.25); border: 2px solid rgba(255, 69, 199, 0.6); font-size: 26px; color: white; backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; pointer-events: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: background 0.1s, transform 0.1s; -webkit-user-select: none; }
-.control:active { background: rgba(255, 69, 199, 0.6); transform: scale(0.9); box-shadow: 0 0 20px #ff45c7; }
-#jump { width: 75px; height: 75px; background: rgba(114, 9, 183, 0.3); border-color: rgba(181, 23, 158, 0.7); font-size: 30px; }
-#jump:active { background: rgba(181, 23, 158, 0.7); }
-.hidden { display: none !important; }
-
-
-
-
-
-
-✦ ECLIPSE
-⭐ 0
-LEVEL 1
-
-Ⅱ
-
-
-ECLIPSE
-Pink Neon Dimension
-✧ ENTER WORLD ✧
-♫ SOUND: ON
-A DREAM BEYOND THE STARS
-
-
-
-
-◀
-▶
-
-↑
-
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-let W, H;
-function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; if(running) makeWorld(); }
-window.addEventListener("resize", resize);
-const $ = id => document.getElementById(id);
-let running = false, paused = false, muted = false;
-let score = 0, level = 1, camera = 0, targetCamera = 0;
-let audio = null, masterGain = null, musicTimer = null, musicStep = 0;
-const keys = {}, touch = { left: false, right: false };
-function initAudio() {
-if (!audio) {
-audio = new (window.AudioContext || window.webkitAudioContext)();
-masterGain = audio.createGain();
-masterGain.gain.value = muted ? 0 : 0.4;
-masterGain.connect(audio.destination);
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECLIPSE — عالم لومي الوردي</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Changa:wght@400;600;700;800&display=swap');
+:root{--pink:#ff4fa3;--hot:#ff168d;--white:#fff8fd;--ink:#17101d;--violet:#a95cff}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#160d20;color:var(--white);font-family:Changa,system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 10%,#572044 0,#211126 48%,#100b19 100%)}
+#game{display:block;width:100vw;height:100vh;touch-action:none}
+#hud{position:fixed;inset:14px 16px auto;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;pointer-events:none;z-index:3}
+.panel{background:#170d25c9;border:1px solid #ff8bc877;border-radius:18px;padding:8px 14px;box-shadow:0 0 22px #ff3d9b24;backdrop-filter:blur(8px);font-weight:700}
+#stats{display:flex;gap:8px;flex-wrap:wrap}
+#controlsTop{display:flex;gap:8px;pointer-events:auto}
+button{font:inherit;color:white;background:linear-gradient(135deg,#ff5bab,#b94cff);border:1px solid #ffd0e9;border-radius:14px;padding:8px 13px;cursor:pointer;box-shadow:0 5px 18px #ff399a38}
+button:active{transform:scale(.96)}
+#brand{position:fixed;top:18px;left:50%;transform:translateX(-50%);font-size:clamp(20px,3vw,34px);font-weight:800;letter-spacing:5px;color:#fff;text-shadow:0 0 9px #ff70bc,0 0 25px #ff168d;pointer-events:none}
+#overlay{position:fixed;inset:0;display:grid;place-items:center;background:#100817b8;z-index:5;backdrop-filter:blur(7px)}
+.card{width:min(92vw,560px);padding:28px 24px;text-align:center;border:1px solid #ff8bc9aa;border-radius:28px;background:linear-gradient(145deg,#32162fef,#171326f5);box-shadow:0 0 70px #ff299b38}
+.card h1{font-size:clamp(35px,7vw,64px);line-height:1;margin:8px 0;color:#ff9dce;text-shadow:0 0 25px #ff168d}
+.card p{line-height:1.9;color:#ffe3f2}
+.girl{font-size:68px;filter:drop-shadow(0 0 15px #ff4fa3)}
+#message{position:fixed;top:90px;left:50%;transform:translateX(-50%);z-index:4;color:#fff;text-shadow:0 0 12px #ff168d;font-weight:800;pointer-events:none;opacity:0;transition:opacity .3s}
+#mobile{position:fixed;bottom:18px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:end;z-index:4;pointer-events:none}
+.pad{display:grid;grid-template-columns:repeat(3,54px);grid-template-rows:repeat(2,48px);gap:6px;pointer-events:auto}
+.pad button,.jump{background:#28132ccc;border:1px solid #ff9dccaa;backdrop-filter:blur(5px);font-size:20px;padding:0;touch-action:none}
+.pad .up{grid-column:2;grid-row:1}.pad .left{grid-column:1;grid-row:2}.pad .down{grid-column:2;grid-row:2}.pad .right{grid-column:3;grid-row:2}
+.jump{width:82px;height:82px;border-radius:50%;font-size:16px;font-weight:800;pointer-events:auto}
+.hint{font-size:13px;color:#ffc7e1}
+@media(min-width:850px){#mobile{opacity:.65}.pad{transform:scale(.85);transform-origin:bottom left}.jump{width:68px;height:68px}}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="brand">E C L I P S E</div>
+<div id="hud">
+ <div id="stats">
+  <div class="panel">✦ <span id="score">000</span></div>
+  <div class="panel">♡ <span id="lives">♥ ♥ ♥</span></div>
+  <div class="panel">المرحلة <span id="level">1</span></div>
+ </div>
+ <div id="controlsTop"><button id="musicBtn">♫ الموسيقى: تشغيل</button><button id="pauseBtn">Ⅱ</button></div>
+</div>
+<div id="message"></div>
+<div id="mobile">
+ <div class="pad">
+  <button class="up" data-key="ArrowUp">↑</button><button class="left" data-key="ArrowLeft">←</button>
+  <button class="down" data-key="ArrowDown">↓</button><button class="right" data-key="ArrowRight">→</button>
+ </div>
+ <button class="jump" data-key="Space">قفز ✧</button>
+</div>
+<div id="overlay">
+ <div class="card">
+  <div class="girl">🎀</div>
+  <h1>LUMI</h1>
+  <p>مرحباً بكِ في عالم الورد والنجوم!<br>اجمعي البلورات، اقفزي بين المنصات، واكتشفي بوابة المرحلة التالية.</p>
+  <p class="hint">التحريك: الأسهم أو A / D — القفز: ↑ أو Space — قفزتان متتاليتان متاحتان.</p>
+  <button id="startBtn">ابدئي المغامرة ✦</button>
+ </div>
+</div>
+<script>
+(()=>{
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+let W=innerWidth,H=innerHeight,scale=1;
+function resize(){W=innerWidth;H=innerHeight;canvas.width=W*devicePixelRatio;canvas.height=H*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}
+addEventListener('resize',resize);resize();
+const keys={},particles=[],stars=[];
+let running=false,paused=false,score=0,level=1,cam=0,last=0,musicOn=true,audio=null,beatTimer=null;
+const worldW=2600,ground=H-92;
+const player={x:100,y:ground-65,w:42,h:58,vx:0,vy:0,speed:4.5,jumps:0,face:1,blink:0};
+let platforms=[],gems=[],flowers=[],gate={x:2450,y:ground-92};
+function makeLevel(){
+ platforms=[{x:0,y:ground,w:worldW,h:130}];
+ for(let i=0;i<14;i++){let x=210+i*165,y=ground-105-(i%3)*48;platforms.push({x,y,w:100+(i%2)*25,h:18})}
+ gems=[];for(let i=0;i<22;i++){let x=170+i*105,y=ground-145-(i%4)*43;gems.push({x,y,got:false,phase:Math.random()*6})}
+ flowers=[];for(let i=0;i<34;i++)flowers.push({x:Math.random()*worldW,y:ground-12,size:8+Math.random()*9});
 }
-if (audio.state === "suspended") audio.resume();
+makeLevel();
+for(let i=0;i<150;i++)stars.push({x:Math.random()*3000,y:Math.random()*H*.75,r:Math.random()*2+0.5,a:Math.random()*6});
+function say(t){let el=document.getElementById('message');el.textContent=t;el.style.opacity=1;clearTimeout(say.t);say.t=setTimeout(()=>el.style.opacity=0,1400)}
+function burst(x,y,color='#ff72bd',n=14){for(let i=0;i<n;i++)particles.push({x,y,vx:(Math.random()-.5)*6,vy:(Math.random()-.7)*6,life:35+Math.random()*20,color,size:2+Math.random()*4})}
+function resizeGround(){return H-92}
+function drawBackground(t){
+ let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#21112f');g.addColorStop(.6,'#63254f');g.addColorStop(1,'#ff8dbb');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ // moon
+ ctx.fillStyle='#ffe8f5';ctx.shadowColor='#ff8ac8';ctx.shadowBlur=35;ctx.beginPath();ctx.arc(W*.78,H*.2,43,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+ for(const s of stars){let x=(s.x-cam*.18+3000)%3000;let tw=.45+.55*Math.sin(t*.002+s.a);ctx.globalAlpha=tw;ctx.fillStyle='#fff4fb';ctx.beginPath();ctx.arc(x%W,s.y,s.r,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
+ // distant hills
+ for(let layer=0;layer<2;layer++){ctx.fillStyle=layer?'#542044':'#3b1b3d';ctx.beginPath();ctx.moveTo(0,H);for(let x=0;x<=W+30;x+=30){let y=H*.72+Math.sin((x+cam*(.12+layer*.1))*.009+layer)*28+layer*35;ctx.lineTo(x,y)}ctx.lineTo(W,H);ctx.fill()}
+ // falling pink symbols
+ for(let i=0;i<25;i++){let x=(i*137-cam*.32+t*.012)%(W+50);let y=(i*83+t*(.025+(i%3)*.009))%(H+30);ctx.globalAlpha=.2;ctx.fillStyle=i%2?'#ffb6dc':'#fff';ctx.font='17px serif';ctx.fillText(i%3?'✧':'♡',x,y); }ctx.globalAlpha=1;
 }
-function playNote(freq, start, duration, type, volume) {
-if (muted || !audio) return;
-try {
-const osc = audio.createOscillator();
-const gain = audio.createGain();
-osc.type = type;
-osc.frequency.setValueAtTime(freq, start);
-gain.gain.setValueAtTime(0.0001, start);
-gain.gain.linearRampToValueAtTime(volume, start + 0.03);
-gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-osc.connect(gain); gain.connect(masterGain);
-osc.start(start); osc.stop(start + duration + 0.02);
-} catch(e) {}
+function drawGirl(x,y,t){
+ ctx.save();ctx.translate(x+player.w/2,y+player.h/2);ctx.scale(player.face,1);
+ let bob=Math.sin(t*.012)*2;
+ // shadow
+ ctx.fillStyle='#34152f66';ctx.beginPath();ctx.ellipse(0,30,22,5,0,0,Math.PI*2);ctx.fill();
+ // hair back
+ ctx.fillStyle='#4b183f';ctx.beginPath();ctx.ellipse(0,-7+bob,22,27,0,0,Math.PI*2);ctx.fill();
+ ctx.fillRect(-19,-3+bob,10,30);ctx.fillRect(9,-3+bob,10,30);
+ // legs
+ ctx.fillStyle='#fff0fa';ctx.fillRect(-12,15+bob,9,16);ctx.fillRect(4,15+bob,9,16);
+ ctx.fillStyle='#ff4e9d';ctx.fillRect(-14,28+bob,13,5);ctx.fillRect(3,28+bob,13,5);
+ // dress
+ ctx.fillStyle='#ff68ad';ctx.beginPath();ctx.moveTo(-13,-1+bob);ctx.lineTo(13,-1+bob);ctx.lineTo(19,20+bob);ctx.lineTo(-19,20+bob);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#fff1f8';ctx.fillRect(-4,1+bob,8,13);
+ // face
+ ctx.fillStyle='#ffe0d8';ctx.beginPath();ctx.ellipse(0,-12+bob,15,17,0,0,Math.PI*2);ctx.fill();
+ // fringe
+ ctx.fillStyle='#55143f';ctx.beginPath();ctx.moveTo(-15,-17+bob);ctx.quadraticCurveTo(-9,-35+bob,4,-27+bob);ctx.quadraticCurveTo(17,-29+bob,15,-10+bob);ctx.quadraticCurveTo(5,-18+bob,1,-10+bob);ctx.lineTo(-3,-17+bob);ctx.lineTo(-9,-9+bob);ctx.lineTo(-12,-18+bob);ctx.fill();
+ // eyes
+ ctx.fillStyle='#4a1b3e';ctx.beginPath();ctx.arc(-6,-10+bob,2,0,7);ctx.arc(6,-10+bob,2,0,7);ctx.fill();
+ ctx.fillStyle='#ff80b9';ctx.beginPath();ctx.arc(-10,-5+bob,3,0,7);ctx.arc(10,-5+bob,3,0,7);ctx.fill();
+ // bow
+ ctx.fillStyle='#ff2c92';ctx.beginPath();ctx.moveTo(10,-29+bob);ctx.lineTo(20,-36+bob);ctx.lineTo(19,-24+bob);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(10,-29+bob);ctx.lineTo(1,-37+bob);ctx.lineTo(2,-24+bob);ctx.closePath();ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(10,-29+bob,3,0,7);ctx.fill();
+ ctx.restore();
 }
-function sound(freq = 500, duration = 0.2, type = "sine") {
-if (muted) return;
-initAudio();
-playNote(freq, audio.currentTime, duration, type, 0.15);
+function draw(t){
+ drawBackground(t);ctx.save();ctx.translate(-cam,0);
+ // ground
+ ctx.fillStyle='#30152e';ctx.fillRect(0,ground,worldW,160);ctx.fillStyle='#ff9bc9';ctx.fillRect(0,ground,worldW,5);
+ for(const f of flowers){ctx.fillStyle='#ff5ca9';ctx.beginPath();for(let k=0;k<5;k++){let a=k*Math.PI*2/5;ctx.ellipse(f.x+Math.cos(a)*f.size*.55, f.y+Math.sin(a)*f.size*.55,f.size*.45,f.size*.3,a,0,7)}ctx.fill();ctx.fillStyle='#ffe8a6';ctx.beginPath();ctx.arc(f.x,f.y,3,0,7);ctx.fill()}
+ for(const p of platforms){ctx.fillStyle='#ff8bc5';ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='#fff0fa';ctx.fillRect(p.x,p.y,p.w,4);ctx.fillStyle='#9f3d82';ctx.fillRect(p.x,p.y+p.h-4,p.w,4)}
+ for(const gem of gems){if(gem.got)continue;let yy=gem.y+Math.sin(t*.005+gem.phase)*5;ctx.save();ctx.translate(gem.x,yy);ctx.rotate(t*.001);ctx.shadowColor='#fff';ctx.shadowBlur=18;ctx.fillStyle='#fff4ff';ctx.beginPath();ctx.moveTo(0,-12);ctx.lineTo(9,0);ctx.lineTo(0,12);ctx.lineTo(-9,0);ctx.closePath();ctx.fill();ctx.restore()}
+ // gate
+ ctx.shadowColor='#ffb5e0';ctx.shadowBlur=25;ctx.strokeStyle='#ffd8ef';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(gate.x,gate.y+44,28,44,0,Math.PI,Math.PI*2);ctx.stroke();ctx.fillStyle='#ffb2da55';ctx.fillRect(gate.x-25,gate.y+40,50,45);ctx.shadowBlur=0;
+ drawGirl(player.x,player.y,t);
+ ctx.restore();
+ for(let i=particles.length-1;i>=0;i--){let p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.08;p.life--;ctx.globalAlpha=Math.max(0,p.life/50);ctx.fillStyle=p.color;ctx.fillRect(p.x-cam,p.y,p.size,p.size);if(p.life<=0)particles.splice(i,1)}ctx.globalAlpha=1;
 }
-function music() {
-initAudio();
-if (musicTimer) clearInterval(musicTimer);
-const melody =;
-const bass =;
-musicTimer = setInterval(() => {
-if (!running || paused || muted) return;
-const now = audio.currentTime;
-const note = melody[musicStep % melody.length];
-playNote(note, now, 0.28, "triangle", 0.05);
-if (musicStep % 4 === 0) {
-playNote(note / 2, now, 0.6, "sine", 0.04);
-playNote(bass[Math.floor(musicStep / 4) % 4], now, 0.5, "sine", 0.06);
+function collide(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+function update(dt){
+ if(!running||paused)return;
+ let left=keys.ArrowLeft||keys.KeyA,right=keys.ArrowRight||keys.KeyD;
+ player.vx=(right?1:0)-(left?1:0);player.vx*=player.speed;if(player.vx)player.face=Math.sign(player.vx);
+ player.vy+=.55;player.x+=player.vx;player.y+=player.vy;
+ player.x=Math.max(0,Math.min(worldW-player.w,player.x));
+ for(const p of platforms){if(player.vy>=0&&player.x+player.w>p.x&&player.x<p.x+p.w&&player.y+player.h>=p.y&&player.y+player.h-player.vy<=p.y+8){player.y=p.y-player.h;player.vy=0;player.jumps=0}}
+ if(player.y>H+100){player.x=Math.max(40,player.x-160);player.y=ground-100;player.vy=0;player.jumps=0;say('لا بأس! تابعي يا لومي ♡')}
+ for(const gem of gems){if(!gem.got&&Math.hypot(player.x+21-gem.x,player.y+25-gem.y)<30){gem.got=true;score+=10;burst(gem.x,gem.y);document.getElementById('score').textContent=String(score).padStart(3,'0');say('+10 بلورات ✧')}}
+ if(player.x>gate.x-25){level++;score+=50;player.x=70;cam=0;makeLevel();document.getElementById('level').textContent=level;document.getElementById('score').textContent=String(score).padStart(3,'0');say('مرحلة جديدة! أنتِ مذهلة ♡');burst(W/2,H/2,'#fff',50)}
+ cam=Math.max(0,Math.min(worldW-W,player.x-W*.38));
 }
-musicStep++;
-}, 280);
+function loop(t){let dt=Math.min(32,t-last);last=t;update(dt);draw(t);requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+function jump(){if(!running||paused)return;if(player.jumps<2){player.vy=player.jumps===0?-11.5:-10;player.jumps++;burst(player.x+20,player.y+player.h,'#ffb4dc',6)}}
+addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();keys[e.code]=true;if((e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW')&&!e.repeat)jump();if(e.code==='Escape')togglePause()});
+addEventListener('keyup',e=>keys[e.code]=false);
+document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true;if(k==='Space'||k==='ArrowUp')jump()});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>keys[k]=false))});
+function initAudio(){
+ if(!audio){let AC=window.AudioContext||window.webkitAudioContext;if(!AC){say('المتصفح لا يدعم الصوت');return}audio=new AC()}
+ if(audio.state==='suspended')audio.resume();
 }
-const player = { x: 100, y: 100, vx: 0, vy: 0, w: 30, h: 45, speed: 5.5, gravity: 0.55, grounded: false, facing: 1 };
-let platforms = [], stars = [], enemies = [], particles = [], flowers = [], floatingNames = [];
-function makeWorld() {
-platforms = []; stars = []; enemies = []; flowers = []; floatingNames = [];
-const floorY = H - 120;
-platforms.push({ x: 0, y: floorY, w: 1200, h: 150 });
-for (let i = 0; i < 25; i++) {
-let x = 400 + i * 280, y = floorY - 110 - (i % 4) * 60;
-let pw = 140 + (i % 3) * 40;
-platforms.push({ x, y, w: pw, h: 22 });
-stars.push({ x: x + pw/2, y: y - 45, taken: false, phase: Math.random() * 7 });
-flowers.push({ x: x + 20, y: y - 12, size: Math.random() * 6 + 6 });
-flowers.push({ x: x + pw - 30, y: y - 12, size: Math.random() * 6 + 6 });
-if (i > 0 && i % 2 === 1) {
-enemies.push({ x: x + 30, y: y - 30, w: 30, h: 30, start: x + 10, end: x + pw - 40, dir: 1, speed: 1.5 + level * 0.2 });
-}
-}
-for (let i = 0; i < 15; i++) {
-floatingNames.push({ x: Math.random() * 8000, y: Math.random() * (H - 250) + 50, text: ["NEON", "DREAM", "PINK", "ECLIPSE", "GLOW"][i%5], size: 14 + Math.random() * 10, phase: Math.random() * 5 });
-}
-}
-function resetPlayer() { player.x = 100; player.y = H - 250; player.vx = 0; player.vy = 0; player.grounded = false; camera = 0; targetCamera = 0; }
-function updateUI() { \(("score").textContent = score; \)("level").textContent = level; }
-function newGame() {
-score = 0; level = 1; makeWorld(); resetPlayer();
-running = true; paused = false;
-$("screen").classList.add("hidden");
-$("top").classList.remove("hidden");
-$("controls").classList.remove("hidden");
-$("pause").classList.remove("hidden");
-updateUI(); music();
-animate();
-}
-function spawnParticles(x, y, color, count=8) {
-for(let i=0; i<count; i++) {
-particles.push({ x, y, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6 - 2, size: Math.random()*4+2, alpha: 1, color });
-}
-}
-function setupControls() {
-const addTouch = (id, action, value) => {
-$(id).addEventListener("touchstart", (e) => { e.preventDefault(); if(action==='move') touch[value] = true; else if(action==='jump') doJump(); }, {passive: false});
-$(id).addEventListener("touchend", (e) => { e.preventDefault(); if(action==='move') touch[value] = false; }, {passive: false});
-$(id).addEventListener("touchcancel", (e) => { e.preventDefault(); if(action==='move') touch[value] = false; }, {passive: false});
-};
-addTouch("left", "move", "left");
-addTouch("right", "move", "right");
-addTouch("jump", "jump");
-window.addEventListener("keydown", e => { keys[e.key] = true; if(e.key===" " || e.key==="ArrowUp") doJump(); });
-window.addEventListener("keyup", e => keys[e.key] = false);
-}
-function doJump() {
-if (!running || paused) return;
-if (player.grounded) {
-player.vy = -13;
-player.grounded = false;
-sound(587, 0.15, "triangle");
-spawnParticles(player.x + player.w/2, player.y + player.h, "#ffdef5", 5);
-}
-}
-setupControls();
-$("start").onclick = () => { initAudio(); newGame(); };
-$("sound").onclick = () => {
-muted = !muted;
-$("sound").textContent = muted ? "♫ SOUND: OFF" : "♫ SOUND: ON";
-if (masterGain) masterGain.gain.value = muted ? 0 : 0.4;
-if (!muted && running) music();
-};
-$("pause").onclick = () => {
-paused = !paused;
-$("pause").textContent = paused ? "▶" : "Ⅱ";
-if(paused) \(("screen").classList.remove("hidden"); else \)("screen").classList.add("hidden");
-};
-function rect(x, y, w, h, color, glow) {
-ctx.fillStyle = color;
-if(glow) { ctx.save(); ctx.shadowColor = glow; ctx.shadowBlur = 15; }
-ctx.fillRect(Math.round(x), Math.round(y), w, h);
-if(glow) ctx.restore();
-}
-function drawBackground() {
-const g = ctx.createLinearGradient(0, 0, 0, H);
-g.addColorStop(0, "#090312"); g.addColorStop(0.5, "#2c0b30"); g.addColorStop(1, "#11051c");
-ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-ctx.save();
-ctx.shadowColor = "#ff00a0"; ctx.shadowBlur = 40;
-ctx.fillStyle = "#fff0f8";
-ctx.beginPath(); ctx.arc(W * 0.8, H * 0.25, 50, 0, Math.PI * 2); ctx.fill();
-ctx.restore();
-for (let i = 0; i < 60; i++) {
-let x = ((i * 199 - camera * 0.1) % W + W) % W, y = (i * 131) % (H - 150);
-ctx.fillStyle = "#ffd9f2";
-ctx.globalAlpha = 0.2 + Math.sin(Date.now() / 400 + i) * 0.5;
-ctx.fillRect(x, y, 2.5, 2.5);
-}
-ctx.globalAlpha = 1;
-}
-function update() {
-if (!running || paused) return;
-if (keys["ArrowLeft"] || keys["a"] || touch.left) {
-player.vx = -player.speed; player.facing = -1;
-} else if (keys["ArrowRight"] || keys["d"] || touch.right) {
-player.vx = player.speed; player.facing = 1;
-} else {
-player.vx *= 0.8;
-}
-player.vy += player.gravity;
-player.x += player.vx;
-player.y += player.vy;
-player.grounded = false;
-targetCamera = player.x - W * 0.35;
-camera += (targetCamera - camera) * 0.1;
-if(camera < 0) camera = 0;
-platforms.forEach(p => {
-if (player.x + player.w > p.x && player.x < p.x + p.w &&
-player.y + player.h >= p.y && player.y + player.h - player.vy <= p.y + 12 && player.vy >= 0) {
-player.y = p.y - player.h; player.vy = 0; player.grounded = true;
-}
-});
-stars.forEach(s => {
-if (!s.taken && player.x + player.w > s.x - 15 && player.x < s.x + 15 && player.y + player.h > s.y - 15 && player.y < s.y + 15) {
-s.taken = true; score += 10; updateUI();
-sound(880, 0.12, "sine");
-spawnParticles(s.x, s.y, "#fff0a1", 12);
-if(score % 100 === 0) { level++; sound(1200, 0.3, "triangle"); updateUI(); makeWorld(); resetPlayer(); }
-}
-});
-enemies.forEach(e => {
-e.x += e.speed * e.dir;
-if(e.x < e.start || e.x > e.end) e.dir *= -1;
-if (player.x + player.w > e.x && player.x < e.x + e.w && player.y + player.h > e.y && player.y < e.y + e.h) {
-if(player.vy > 0 && player.y + player.h - player.vy <= e.y + 10) {
-e.x = -9999; player.vy = -9; score += 20; updateUI(); sound(440, 0.15, "sawtooth");
-} else {
-sound(150, 0.4, "sawtooth"); spawnParticles(player.x+15, player.y+20, "#ff0055", 20);
-resetPlayer();
-}
-}
-});
-if(player.y > H) { sound(150, 0.3, "sawtooth"); resetPlayer(); }
-particles.forEach((p,i) => {
-p.x += p.vx; p.y += p.vy; p.alpha -= 0.02;
-if(p.alpha <= 0) particles.splice(i,1);
-});
-}
-function draw() {
-ctx.clearRect(0, 0, W, H);
-drawBackground();
-floatingNames.forEach(n => {
-ctx.font = bold ${n.size}px Arial; ctx.fillStyle = "rgba(255, 105, 180, 0.08)";
-ctx.fillText(n.text, n.x - camera * 0.4, n.y + Math.sin(Date.now()/500 + n.phase)*10);
-});
-platforms.forEach(p => {
-let x = p.x - camera; if (x + p.w < -50 || x > W + 50) return;
-rect(x, p.y, p.w, p.h, "#2a0b35");
-rect(x, p.y, p.w, 5, "#ff45c7", "#ff45c7");
-});
-flowers.forEach(f => {
-let x = f.x - camera; if (x < -30 || x > W + 30) return;
-rect(x + f.size/3, f.y, f.size/3, 12, "#38b000");
-rect(x, f.y - f.size/2, f.size, f.size, "#ff75cb", "#ff75cb");
-rect(x + f.size/4, f.y - f.size/4, f.size/2, f.size/2, "#fff1a5");
-});
-stars.forEach(s => {
-if (s.taken) return;
-let x = s.x - camera; if (x < -30 || x > W + 30) return;
-ctx.save(); ctx.translate(x, s.y + Math.sin(Date.now() / 200 + s.phase) * 6);
-ctx.rotate(Date.now() / 600); ctx.shadowColor = "#fff2a5"; ctx.shadowBlur = 18; ctx.fillStyle = "#fff0a1";
-ctx.beginPath();
-for (let i = 0; i < 10; i++) { let r = i % 2 === 0 ? 12 : 5; let a = i * Math.PI / 5; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
-ctx.closePath(); ctx.fill(); ctx.restore();
-});
-particles.forEach(p => {
-ctx.save(); ctx.globalAlpha = p.alpha;
-rect(p.x - camera, p.y, p.size, p.size, p.color, p.color);
-ctx.restore();
-});
-enemies.forEach(e => {
-let x = e.x - camera; if (x < -50 || x > W + 50) return;
-rect(x, e.y, e.w, e.h, "#4a154b", "#ff0055");
-rect(x + 4, e.y + 6, 6, 6, "white"); rect(x + e.w - 10, e.y + 6, 6, 6, "white");
-rect(x + 6, e.y + 8, 3, 3, "black"); rect(x + e.w - 8, e.y + 8, 3, 3, "black");
-});
-let px = player.x - camera, py = player.y, walk = player.grounded ? Math.sin(Date.now() / 100) * 5 : 0;
-ctx.save(); ctx.translate(px + player.w/2, py + player.h/2); ctx.scale(player.facing, 1);
-rect(-player.w/2, -player.h/2, player.w, player.h, "#ff00a0", "#ff00a0");
-rect(-player.w/2 + 3, -player.h/2 + 3, player.w - 6, player.h - 6, "#fff0f8");
-rect(4, -14, 6, 6, "#00f0ff", "#00f0ff");
-rect(-10, player.h/2 - 4 + walk, 8, 5, "#4a154b");
-rect(2, player.h/2 - 4 - walk, 8, 5, "#4a154b");
-ctx.restore();
-}
-function animate() {
-update(); draw();
-requestAnimationFrame(animate);
-}
- 
+function note(freq,dur=.18,type='sine',vol=.045){if(!audio||!musicOn)return;let o=audio.createOscillator(),g=audio.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(.0001,audio.currentTime);g.gain.exponentialRampToValueAtTime(vol,audio.currentTime+.025);g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+dur);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+dur+.02)}
+let seq=[523,659,784,659,587,698,880,698,523,659,784,988,880,784,659,587],step=0;
+function startMusic(){initAudio();if(!audio||beatTimer)return;beatTimer=setInterval(()=>{if(musicOn&&!paused){note(seq[step%seq.length],.22,'triangle',.035);if(step%4===0)note(seq[step%seq.length]/2,.32,'sine',.025);step++}},240)}
+document.getElementById('startBtn').onclick=()=>{document.getElementById('overlay').style.display='none';running=true;paused=false;startMusic();say('انطلقي يا لومي! ✧')};
+document.getElementById('musicBtn').onclick=()=>{musicOn=!musicOn;document.getElementById('musicBtn').textContent='♫ الموسيقى: '+(musicOn?'تشغيل':'إيقاف');if(musicOn)startMusic()};
+function togglePause(){if(!running)return;paused=!paused;document.getElementById('pauseBtn').textContent=paused?'▶':'Ⅱ';say(paused?'استراحة صغيرة':'عودة إلى المغامرة!')}
+document.getElementById('pauseBtn').onclick=togglePause;
+})();
+</script>
+</body>
+</html>
